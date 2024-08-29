@@ -1,0 +1,44 @@
+{
+    "window": {
+        "width": 800,
+        "height": 600
+    },
+    "canvas": {
+        "width": 800,
+        "height": 600
+    },
+    "wall_params": {
+        "thickness": 20.0,
+        "color": [0.8, 0.8, 0.8],
+        "left_x": -400.0,
+        "right_x": 400.0,
+        "bottom_y": -300.0,
+        "pad_size": [100.0, 20.0],
+        "pad_color": [0.863, 0.749,0.882]
+    },
+    "physics": {
+        "gravity": 9.8
+    },
+    "objects": {
+        "blocks": [
+            {
+            "x": 100,
+            "y": 100,
+            "w": 50
+        }
+    ],
+        "player": {
+            "x": 100,
+            "y": -300,
+            "size": 30,
+            "speed": 400.0,
+            "mass": 40.0,
+            "jump_force": 230.0,
+            "start_y": 100.0
+        },
+        "goal": {
+            "x": 200,
+            "y": 500
+        }
+    }
+}
