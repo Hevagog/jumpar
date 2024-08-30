@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 mod components;
+mod events;
 mod plugins;
 mod resources;
 mod systems;
@@ -11,12 +12,15 @@ fn main() {
         .insert_resource(resources::json_reader::JsonFilePath(
             "assets/config.json".to_string(),
         ))
+        .add_event::<events::Collision>()
         .add_systems(Startup, (resources::json_reader::read_json, setup).chain())
         .add_systems(
             FixedUpdate,
             (
                 systems::physics::apply_gravity,
                 systems::physics::apply_velocity,
+                systems::physics::detect_collision_system,
+                systems::physics::handle_collision_system,
                 systems::player_systems::player_bounds_system,
                 systems::player_systems::player_movement_system,
             )
@@ -24,9 +28,6 @@ fn main() {
         )
         .run();
 }
-
-#[derive(Event, Default)]
-struct CollisionEvent;
 
 fn setup(mut commands: Commands, config: Res<resources::json_reader::Config>) {
     commands.spawn(Camera2dBundle::default());
@@ -79,4 +80,8 @@ fn setup(mut commands: Commands, config: Res<resources::json_reader::Config>) {
         components::WallLocation::Right,
         &config,
     ));
+
+    for block in &config.objects.blocks {
+        commands.spawn(components::BlockBundle::new(block));
+    }
 }
