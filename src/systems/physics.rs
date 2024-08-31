@@ -29,20 +29,25 @@ pub fn apply_gravity(
 }
 
 pub fn detect_collision_system(
-    player_query: Query<(&Transform, &components::PlayerState), With<components::Player>>,
-    block_query: Query<(&components::Collider, &Transform)>,
+    mut player_query: Query<(&Transform, &mut components::PlayerState), With<components::Player>>,
+    block_query: Query<(&components::Collider, &Transform, &components::Block)>,
     config: Res<resources::json_reader::Config>,
     mut collision_events: EventWriter<events::Collision>,
 ) {
-    let (player_transform, player_state) = player_query.single();
+    let (player_transform, mut player_state) = player_query.single_mut();
 
     let player_aabb = Aabb2d::new(
         player_transform.translation.truncate(),
-        Vec2::new(config.objects.player.size, config.objects.player.size),
+        Vec2::new(
+            config.objects.player.size / 2.0,
+            config.objects.player.size / 2.0,
+        ),
     );
 
-    if let Some(collision) = detect_collision(&player_aabb, &block_query, &config) {
+    if let Some(collision) = detect_collision(&player_aabb, block_query, &config) {
         collision_events.send(collision);
+    } else {
+        player_state.grounded = false;
     }
 }
 
@@ -56,45 +61,57 @@ pub fn handle_collision_system(
         With<components::Player>,
     >,
     mut collision_events: EventReader<events::Collision>,
+    config: Res<resources::json_reader::Config>,
 ) {
     let (mut player_transform, mut player_velocity, mut player_state) = player_query.single_mut();
 
     for collision in collision_events.read() {
-        match collision {
-            events::Collision::Left => {
-                player_transform.translation.x -= 0.01;
+        println!("{:?}", collision.side);
+        let block = config.objects.blocks.get(collision.block_index).unwrap();
+        match collision.side {
+            events::CollisionSide::Left => {
                 player_velocity.x = 0.0;
+                player_transform.translation.x =
+                    block.x + block.w / 2.0 + config.objects.player.size / 2.0;
             }
-            events::Collision::Right => {
-                player_transform.translation.x += 0.01;
+            events::CollisionSide::Right => {
                 player_velocity.x = 0.0;
+                player_transform.translation.x =
+                    block.x - block.w / 2.0 - config.objects.player.size / 2.0;
             }
-            events::Collision::Top => {
-                player_transform.translation.y += 0.01;
-                player_velocity.y = 0.0;
-            }
-            events::Collision::Bottom => {
-                player_transform.translation.y -= 0.01;
-                player_velocity.y = 0.0;
+            events::CollisionSide::Top => {
                 player_state.grounded = true;
+                player_velocity.y = 0.0;
+                player_transform.translation.y =
+                    block.y - block.h / 2.0 - config.objects.player.size / 2.0;
+            }
+            events::CollisionSide::Bottom => {
+                player_velocity.y = 0.0;
+                player_transform.translation.y =
+                    block.y + block.h / 2.0 + config.objects.player.size / 2.0;
             }
         }
     }
+    collision_events.clear();
 }
 
 fn detect_collision(
     player_aabb: &Aabb2d,
-    block_query: &Query<(&components::Collider, &Transform)>,
+    block_query: Query<(&components::Collider, &Transform, &components::Block)>,
     config: &resources::json_reader::Config,
 ) -> Option<events::Collision> {
-    for ((_, block_transform), block_config) in block_query.iter().zip(config.objects.blocks.iter())
+    for ((_, block_transform, block_index), block_config) in
+        block_query.iter().zip(config.objects.blocks.iter())
     {
-        let block_size = Vec2::new(block_config.w, block_config.h);
+        let block_size = Vec2::new(block_config.w / 2.0, block_config.h / 2.0);
         let block_aabb = Aabb2d::new(block_transform.translation.truncate(), block_size);
 
         if overlap(&player_aabb, &block_aabb) {
             let collision = get_collision(&player_aabb, &block_aabb);
-            return Some(collision);
+            return Some(events::Collision {
+                block_index: block_index.0,
+                side: collision,
+            });
         }
     }
     None
@@ -107,21 +124,25 @@ fn overlap(first: &Aabb2d, second: &Aabb2d) -> bool {
         && first.max.y > second.min.y
 }
 
-fn get_collision(first: &Aabb2d, second: &Aabb2d) -> events::Collision {
-    let x_overlap = first.max.x - second.min.x;
-    let y_overlap = first.max.y - second.min.y;
+fn get_collision(first: &Aabb2d, second: &Aabb2d) -> events::CollisionSide {
+    let x_overlap = (first.max.x - second.min.x)
+        .abs()
+        .min((second.max.x - first.min.x).abs());
+    let y_overlap = (first.max.y - second.min.y)
+        .abs()
+        .min((second.max.y - first.min.y).abs());
 
     if x_overlap < y_overlap {
         if first.min.x < second.min.x {
-            events::Collision::Left
+            events::CollisionSide::Left
         } else {
-            events::Collision::Right
+            events::CollisionSide::Right
         }
     } else {
         if first.min.y < second.min.y {
-            events::Collision::Bottom
+            events::CollisionSide::Bottom
         } else {
-            events::Collision::Top
+            events::CollisionSide::Top
         }
     }
 }

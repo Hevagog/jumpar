@@ -28,6 +28,9 @@ pub struct Velocity(pub Vec2);
 #[derive(Component)]
 pub struct Collider;
 
+#[derive(Component)]
+pub struct Block(pub usize);
+
 #[derive(Bundle)]
 pub struct BlockBundle {
     pub collider: Collider,

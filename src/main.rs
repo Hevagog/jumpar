@@ -80,8 +80,10 @@ fn setup(mut commands: Commands, config: Res<resources::json_reader::Config>) {
         components::WallLocation::Right,
         &config,
     ));
-
-    for block in &config.objects.blocks {
-        commands.spawn(components::BlockBundle::new(block));
+    for (index, block) in config.objects.blocks.iter().enumerate() {
+        commands.spawn((
+            components::BlockBundle::new(block),
+            components::Block(index),
+        ));
     }
 }
