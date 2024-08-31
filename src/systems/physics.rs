@@ -72,23 +72,23 @@ pub fn handle_collision_system(
             events::CollisionSide::Left => {
                 player_velocity.x = 0.0;
                 player_transform.translation.x =
-                    block.x + block.w / 2.0 + config.objects.player.size / 2.0;
+                    block.x - block.w / 2.0 - config.objects.player.size / 2.0;
             }
             events::CollisionSide::Right => {
                 player_velocity.x = 0.0;
                 player_transform.translation.x =
-                    block.x - block.w / 2.0 - config.objects.player.size / 2.0;
+                    block.x + block.w / 2.0 + config.objects.player.size / 2.0;
             }
             events::CollisionSide::Top => {
                 player_state.grounded = true;
                 player_velocity.y = 0.0;
                 player_transform.translation.y =
-                    block.y - block.h / 2.0 - config.objects.player.size / 2.0;
+                    block.y + block.h / 2.0 + config.objects.player.size / 2.0;
             }
             events::CollisionSide::Bottom => {
                 player_velocity.y = 0.0;
                 player_transform.translation.y =
-                    block.y + block.h / 2.0 + config.objects.player.size / 2.0;
+                    block.y - block.h / 2.0 - config.objects.player.size / 2.0;
             }
         }
     }
