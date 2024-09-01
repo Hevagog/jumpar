@@ -5,6 +5,9 @@ mod player;
 #[derive(Component)]
 pub struct Pad;
 
+#[derive(Component)]
+pub struct Goal;
+
 #[derive(Bundle)]
 pub struct WallBundle {
     pub collider: Collider,

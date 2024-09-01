@@ -66,7 +66,6 @@ pub fn handle_collision_system(
     let (mut player_transform, mut player_velocity, mut player_state) = player_query.single_mut();
 
     for collision in collision_events.read() {
-        println!("{:?}", collision.side);
         let block = config.objects.blocks.get(collision.block_index).unwrap();
         match collision.side {
             events::CollisionSide::Left => {
