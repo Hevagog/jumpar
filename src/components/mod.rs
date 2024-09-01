@@ -1,6 +1,9 @@
 use crate::resources;
 use bevy::prelude::*;
-mod player;
+pub mod player;
+
+#[derive(Component)]
+pub struct FpsText;
 
 #[derive(Component)]
 pub struct Pad;

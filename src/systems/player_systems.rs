@@ -1,6 +1,17 @@
 use crate::components;
 use bevy::prelude::*;
 
+pub struct PlayerPlugin;
+
+impl Plugin for PlayerPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(
+            FixedUpdate,
+            (player_movement_system, player_bounds_system).chain(),
+        );
+    }
+}
+
 pub fn player_movement_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut query: Query<
