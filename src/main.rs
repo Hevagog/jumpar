@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 mod components;
+mod events;
 mod plugins;
 mod resources;
 mod systems;
@@ -11,22 +12,23 @@ fn main() {
         .insert_resource(resources::json_reader::JsonFilePath(
             "assets/config.json".to_string(),
         ))
+        .add_event::<events::Collision>()
         .add_systems(Startup, (resources::json_reader::read_json, setup).chain())
         .add_systems(
             FixedUpdate,
             (
                 systems::physics::apply_gravity,
                 systems::physics::apply_velocity,
+                systems::physics::detect_collision_system,
+                systems::physics::handle_collision_system,
                 systems::player_systems::player_bounds_system,
                 systems::player_systems::player_movement_system,
+                systems::goal_systems::goal_system,
             )
                 .chain(),
         )
         .run();
 }
-
-#[derive(Event, Default)]
-struct CollisionEvent;
 
 fn setup(mut commands: Commands, config: Res<resources::json_reader::Config>) {
     commands.spawn(Camera2dBundle::default());
@@ -54,18 +56,21 @@ fn setup(mut commands: Commands, config: Res<resources::json_reader::Config>) {
     ));
 
     let goal_y = config.objects.goal.y + config.wall_params.bottom_y;
-    commands.spawn((SpriteBundle {
-        transform: Transform {
-            translation: Vec3::new(config.objects.goal.x, goal_y, 0.0),
-            scale: Vec3::splat(config.objects.player.size),
+    commands.spawn((
+        SpriteBundle {
+            transform: Transform {
+                translation: Vec3::new(config.objects.goal.x, goal_y, 0.0),
+                scale: Vec3::splat(config.objects.player.size),
+                ..default()
+            },
+            sprite: Sprite {
+                color: Color::srgb(1.0, 0.5, 0.5),
+                ..default()
+            },
             ..default()
         },
-        sprite: Sprite {
-            color: Color::srgb(1.0, 0.5, 0.5),
-            ..default()
-        },
-        ..default()
-    },));
+        components::Goal,
+    ));
 
     commands.spawn(components::WallBundle::new(
         components::WallLocation::Bottom,
@@ -79,4 +84,10 @@ fn setup(mut commands: Commands, config: Res<resources::json_reader::Config>) {
         components::WallLocation::Right,
         &config,
     ));
+    for (index, block) in config.objects.blocks.iter().enumerate() {
+        commands.spawn((
+            components::BlockBundle::new(block),
+            components::Block(index),
+        ));
+    }
 }
