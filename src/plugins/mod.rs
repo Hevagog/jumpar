@@ -11,7 +11,7 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             FixedUpdate,
-            (player_movement_system, player_bounds_system).chain(),
+            (player_bounds_system, player_movement_system).chain(),
         );
     }
 }
