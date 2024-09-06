@@ -35,6 +35,9 @@ pub struct Velocity(pub Vec2);
 pub struct Collider;
 
 #[derive(Component)]
+pub struct Direction(pub f32);
+
+#[derive(Component)]
 pub struct Block(pub usize);
 
 #[derive(Bundle)]

@@ -22,6 +22,7 @@ fn main() {
             (
                 systems::ui_systems::text_update_system,
                 systems::goal_systems::goal_system,
+                systems::block_systems::move_block_system,
             )
                 .chain(),
         )
