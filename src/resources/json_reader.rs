@@ -63,7 +63,7 @@ pub struct Player {
     pub start_y: f32,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Block {
     pub x: f32,
     pub y: f32,

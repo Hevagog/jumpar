@@ -28,7 +28,7 @@ pub struct Player;
 #[derive(Component)]
 pub struct Mass(pub f32);
 
-#[derive(Component, Deref, DerefMut)]
+#[derive(Component, Deref, DerefMut, Clone, Copy)]
 pub struct Velocity(pub Vec2);
 
 #[derive(Component)]

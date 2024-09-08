@@ -1,16 +1,7 @@
 use crate::components;
+use crate::events;
+use crate::resources;
 use bevy::prelude::*;
-
-pub struct PlayerPlugin;
-
-impl Plugin for PlayerPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(
-            FixedUpdate,
-            (player_movement_system, player_bounds_system).chain(),
-        );
-    }
-}
 
 pub fn player_movement_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
@@ -33,6 +24,36 @@ pub fn player_movement_system(
     if keyboard_input.pressed(KeyCode::Space) && player_state.grounded {
         player_velocity.y = config.objects.player.jump_force;
         player_state.grounded = false;
+    }
+}
+
+pub fn player_on_block_moving_system(
+    mut param_set: ParamSet<(
+        Query<&mut components::Velocity, With<components::Player>>,
+        Query<(&components::Velocity, &components::Block)>,
+    )>,
+    mut collision_events: EventReader<events::Collision>,
+) {
+    let mut collisions_to_handle = Vec::new();
+    for collision in collision_events.read() {
+        if let Some((block_velocity, _)) = param_set
+            .p1()
+            .iter()
+            .find(|(_, b)| b.0 == collision.block_index)
+        {
+            collisions_to_handle.push((collision.side, *block_velocity));
+        }
+    }
+
+    if let Ok(mut player_velocity) = param_set.p0().get_single_mut() {
+        for (side, block_velocity) in collisions_to_handle {
+            match side {
+                events::CollisionSide::Top => {
+                    player_velocity.x += block_velocity.x;
+                }
+                _ => {}
+            }
+        }
     }
 }
 
