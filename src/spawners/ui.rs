@@ -1,12 +1,7 @@
 use crate::components;
-use crate::resources;
 use bevy::{color::palettes::css::GOLD, prelude::*};
 
-pub fn spawn_ui(
-    commands: &mut Commands,
-    config: &Res<resources::json_reader::Config>,
-    asset_server: &Res<AssetServer>,
-) {
+pub fn spawn_ui(commands: &mut Commands, asset_server: &Res<AssetServer>) {
     commands.spawn((
         // Create a TextBundle that has a Text with a list of sections.
         TextBundle::from_sections([

@@ -1,6 +1,5 @@
 use crate::components;
 use crate::events;
-use crate::resources;
 use bevy::prelude::*;
 
 pub fn player_movement_system(
@@ -49,7 +48,7 @@ pub fn player_on_block_moving_system(
         for (side, block_velocity) in collisions_to_handle {
             match side {
                 events::CollisionSide::Top => {
-                    player_velocity.x += block_velocity.x;
+                    player_velocity.x += 2.0 * block_velocity.x;
                 }
                 _ => {}
             }

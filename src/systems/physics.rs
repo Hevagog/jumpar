@@ -23,7 +23,7 @@ pub fn apply_gravity(
     config: Res<resources::json_reader::Config>,
 ) {
     let (mut velocity, mass, player_state) = query.single_mut();
-    if !player_state.grounded {
+    if player_state.grounded == false {
         velocity.y -= config.physics.gravity * mass.0 * time.delta_seconds();
     }
 }
@@ -45,6 +45,9 @@ pub fn detect_collision_system(
     );
 
     if let Some(collision) = detect_collision(&player_aabb, block_query, &config) {
+        if collision.side == events::CollisionSide::Top {
+            player_state.grounded = true;
+        }
         collision_events.send(collision);
     } else {
         player_state.grounded = false;
@@ -95,7 +98,6 @@ pub fn handle_collision_system(
                         block_translation.x + block.w / 2.0 + config.objects.player.size / 2.0;
                 }
                 events::CollisionSide::Top => {
-                    player_state.grounded = true;
                     player_velocity.y = 0.0;
                     player_transform.translation.y =
                         block_translation.y + block.h / 2.0 + config.objects.player.size / 2.0;

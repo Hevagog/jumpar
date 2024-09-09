@@ -12,7 +12,7 @@ pub fn move_block_system(
     )>,
     config: Res<resources::json_reader::Config>,
 ) {
-    for ((_, mut block_transform, mut direction, mut block_velocity, block_index), block_config) in
+    for ((_, block_transform, mut direction, mut block_velocity, _), block_config) in
         block_query.iter_mut().zip(config.objects.blocks.iter())
     {
         match direction.0 > 0.0 {

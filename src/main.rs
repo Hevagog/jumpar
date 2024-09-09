@@ -15,8 +15,7 @@ fn main() {
         ))
         .add_event::<events::Collision>()
         .add_systems(Startup, (resources::json_reader::read_json, setup).chain())
-        .add_plugins(plugins::PhysicsPlugin)
-        .add_plugins(plugins::PlayerPlugin)
+        .add_plugins(plugins::GeneralPlugin)
         .add_systems(
             FixedUpdate,
             (
@@ -39,5 +38,5 @@ fn setup(
     spawners::goal::spawn_goal(&mut commands, &config);
     spawners::walls::spawn_walls(&mut commands, &config);
     spawners::blocks::spawn_blocks(&mut commands, &config);
-    spawners::ui::spawn_ui(&mut commands, &config, &asset_server);
+    spawners::ui::spawn_ui(&mut commands, &asset_server);
 }
